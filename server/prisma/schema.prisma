@@ -1,0 +1,126 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String        @id @default(uuid())
+  username     String        @unique
+  passwordHash String        @map("password_hash")
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
+
+  skills       Skill[]
+  dailyRecords DailyRecord[]
+  tags         Tag[]
+  decayLogs    DecayLog[]
+
+  @@map("users")
+}
+
+model Skill {
+  id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+  name        String
+  description String?
+  color       String   @default("#0071e3")
+  totalHours  Float    @default(0) @map("total_hours")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skillLogs  DailySkillLog[]
+
+  @@unique([userId, name])
+  @@index([userId])
+  @@map("skills")
+}
+
+model DailyRecord {
+  id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+  recordDate  DateTime @db.Date @map("record_date")
+  totalHours  Float    @default(0) @map("total_hours")
+  textContent String   @map("text_content")
+  status      String   @default("draft") // draft | submitted
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  user         User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skillLogs    DailySkillLog[]
+  images       RecordImage[]
+  recordTags   RecordTag[]
+
+  @@unique([userId, recordDate])
+  @@index([userId, recordDate])
+  @@map("daily_records")
+}
+
+model DailySkillLog {
+  id            String @id @default(uuid())
+  dailyRecordId String @map("daily_record_id")
+  skillId       String @map("skill_id")
+  hours         Float  @default(0)
+
+  dailyRecord DailyRecord @relation(fields: [dailyRecordId], references: [id], onDelete: Cascade)
+  skill       Skill       @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@index([dailyRecordId])
+  @@index([skillId])
+  @@map("daily_skill_logs")
+}
+
+model RecordImage {
+  id            String   @id @default(uuid())
+  dailyRecordId String   @map("daily_record_id")
+  url           String
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  dailyRecord DailyRecord @relation(fields: [dailyRecordId], references: [id], onDelete: Cascade)
+
+  @@index([dailyRecordId])
+  @@map("record_images")
+}
+
+model Tag {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  name      String
+  color     String   @default("#ff9500")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recordTags RecordTag[]
+
+  @@unique([userId, name])
+  @@index([userId])
+  @@map("tags")
+}
+
+model RecordTag {
+  dailyRecordId String @map("daily_record_id")
+  tagId         String @map("tag_id")
+
+  dailyRecord DailyRecord @relation(fields: [dailyRecordId], references: [id], onDelete: Cascade)
+  tag         Tag         @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([dailyRecordId, tagId])
+  @@map("record_tags")
+}
+
+model DecayLog {
+  id             String   @id @default(uuid())
+  userId         String   @map("user_id")
+  decayDate      DateTime @db.Date @map("decay_date")
+  skillsAffected Json     @map("skills_affected")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, decayDate])
+  @@map("decay_logs")
+}

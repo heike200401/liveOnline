@@ -1,0 +1,79 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+:root {
+  --tooltip-bg: #ffffff;
+  --tooltip-border: rgba(0, 0, 0, 0.06);
+  --tooltip-text: #1d1d1f;
+  --chart-tick: #6e6e73;
+  --heatmap-empty-bg: rgba(0, 0, 0, 0.04);
+  --heatmap-low-text: #1d1d1f;
+}
+
+html.dark {
+  color-scheme: dark;
+  --tooltip-bg: #2c2c2e;
+  --tooltip-border: rgba(255, 255, 255, 0.1);
+  --tooltip-text: #f5f5f7;
+  --chart-tick: #98989d;
+  --heatmap-empty-bg: rgba(255, 255, 255, 0.08);
+  --heatmap-low-text: #f5f5f7;
+}
+
+body {
+  margin: 0;
+  background-color: #f5f5f7;
+  color: #1d1d1f;
+  -webkit-font-smoothing: antialiased;
+  font-family: -apple-system, "SF Pro Text", "PingFang SC", "Segoe UI",
+    sans-serif;
+}
+
+html.dark body {
+  background-color: #1d1d1f;
+  color: #f5f5f7;
+}
+
+/* 标签胶囊：颜色跟随 --tag-color，暗色下自动提亮以保证可读性 */
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.125rem 0.625rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  white-space: nowrap;
+  background: color-mix(in srgb, var(--tag-color) 10%, transparent);
+  color: var(--tag-color);
+}
+
+html.dark .tag-chip {
+  background: color-mix(in srgb, var(--tag-color) 24%, transparent);
+  color: color-mix(in srgb, var(--tag-color) 62%, white);
+}
+
+/* 输入框 placeholder 在暗色下提亮 */
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: #98989d;
+  opacity: 1;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+input,
+textarea,
+select,
+button {
+  font: inherit;
+}
